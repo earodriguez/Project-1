@@ -8,7 +8,7 @@ typedef struct Node {
     int size;
 } Node;
 
-void init(Node *queue) { //initializes all queue elements to 0
+void queueInit(Node *queue) { //initializes all queue elements to 0
 
     if (queue == NULL){ //If the queue does not exist, exit prematurely
         return;
@@ -49,7 +49,7 @@ void queueMoveUp(int *queSeq, int *size){
     *size -= 1;
 }
 
-void rmQueue(Node *queue) {
+void queueRm(Node *queue) {
 
     if (queue == NULL){
     return 0;
@@ -58,4 +58,12 @@ void rmQueue(Node *queue) {
     int rmEle = queue -> seq[0]
     queueMoveUp(queue -> seq, &queue -> curPos);
     return rmEle;
+}
+
+void queuePrint(Node *queue){
+    
+    for (int i = 0; i < queue -> size; i++){
+    printf("Job: %d\t\n", queue -> seq[i];
+    }
+
 }

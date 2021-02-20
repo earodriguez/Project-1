@@ -20,7 +20,7 @@
 
 typedef struct eventStruct {
 
-    int job;
+    int seq;
     int type;
     int time;
 }cpuEvent;

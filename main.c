@@ -4,11 +4,16 @@
 #include<time.h>
 #include<unistd.h>
 
+#include"PQ.c"
+#include"queue.c"
+#include"randomGen.c"
+#include"configFileReader.c"
+
 #define IDLE 0
 #define BUSY 1
 #define QUEUE_SIZE 10
 
-int CPU_state = 0;
+int CPU_STATE = 0;
 int TIME = 0;
 int DISK1_STATUS = 0;
 int DISK2_STATUS = 0;
@@ -35,6 +40,25 @@ Node QUE_DISK2;
 Node QUE_NETWORK;
 
 int main(){
+
+    parseFile();
+    srand(getSeed());
+    cpuEvent* task;
+    priQue* eveQue = initPriorityQueue()
+
+    queueInit(&queue_CPU);
+    queueInit(&queue_DISK1):
+    queueInit(&queue_DISK2);
+    queueInit(&queue_NETWORK);
+
+    FILE* fileOut = fopen("log.txt", "w");
+    fclose(fileOut);
+
+    cpuEvent job1;
+    job1.seq = 1;
+    job1.type = ARRIVAL;
+    job1.time = 0;
+    push(eveQue, &job1);
 
 
 }

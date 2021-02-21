@@ -55,9 +55,9 @@ int getQUIT_PROB(){
     return *(temp+4);
 }
 
-int getNETWORK_PROB(){
+/*int getNETWORK_PROB(){
     return *(temp+5);
-}
+}*/
 
 int getCPU_MIN(){
     return *(temp+6);
@@ -83,15 +83,15 @@ int getDISK2_MAX(){
     return *(temp+11);
 }
 
-int getNETWORK_MIN(){
+/*int getNETWORK_MIN(){
     return *(temp+12);
 }
 
 int getNETWORK_MAX(){
     return *(temp+13);
-}
+}*/
 
-void destroyPtr(){
-    free(temps);
+void clearPtr(){
+    free(temp);
 }
 

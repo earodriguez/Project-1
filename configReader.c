@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 14
+#define SIZE 12
 
 int* temp;
 unsigned int seed;
@@ -17,7 +17,7 @@ void parseFile(){
     if (fp != NULL) { //checking if file was opened correctly
         //if successful, continues on to scan the config file line by line
         if (fscanf(fp, "%s %u\n", name[i], &seed) != EOF){
-            printf("0. ReadL %s %u\n", name[i], temp[i]);
+            printf("0. Read: %s %u\n", name[i], temp[i]);
         }
         while (fscanf(fp, "%s %d\n", name[i], &temp[i]) != EOF){
             printf("%d. Read: %s %d\n", i + 1, name[i], temp[i]);
@@ -25,9 +25,10 @@ void parseFile(){
         }
     }
     else {
-        printf("ERROR File not opened");
+        printf("ERROR File not opened\n");
         exit(1);
     }
+    printf("Config scanned successfully\n");
     fclose(fp);
 }
 
@@ -60,27 +61,27 @@ int getQUIT_PROB(){
 }*/
 
 int getCPU_MIN(){
-    return *(temp+6);
+    return *(temp+5);
 }
 
 int getCPU_MAX(){
-    return *(temp+7);
+    return *(temp+6);
 }
 
 int getDISK1_MIN(){
-    return *(temp+8);
+    return *(temp+7);
 }
 
 int getDISK1_MAX(){
-    return *(temp+9);
+    return *(temp+8);
 }
 
 int getDISK2_MIN(){
-    return *(temp+10);
+    return *(temp+9);
 }
 
 int getDISK2_MAX(){
-    return *(temp+11);
+    return *(temp+10);
 }
 
 /*int getNETWORK_MIN(){

@@ -1,9 +1,8 @@
 #include <stdio.h>
 
 int randNum (int min, int max){
-
     if( (max - min) < 0 || max < 0 || min < 0){
-        printf("Random parameters invalid");
+        printf("Random parameters invalid\n");
     }
     return rand() % (max - min + 1) + min;
 }
@@ -18,7 +17,6 @@ int probGet (int prob){ //Calculates the chance of a process going to disk/netwo
     }
 
     int i = randNum(1, 100);
-
     if(i <= prob){
         return 0;
     }

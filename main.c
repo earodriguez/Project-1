@@ -9,7 +9,7 @@
 #include"PQ.c"
 #include"queue.c"
 #include"randomGen.c"
-#include"configFileReader.c"
+#include"configReader.c"
 
 //Global definitions
 #define IDLE 0
@@ -46,12 +46,12 @@ int DISK2_MAX;
 Node QUE_CPU;
 Node QUE_DISK1;
 Node QUE_DISK2;
-Node QUE_NETWORK;
+//Node QUE_NETWORK;
 
 
 int main(){
 
-    parseFile();
+    getConfig();
     srand(getSEED());
     cpuEvent* task;
     priQue* eveQue = initPriorityQueue();
@@ -59,7 +59,7 @@ int main(){
     queueInit(&QUE_CPU);
     queueInit(&QUE_DISK1);
     queueInit(&QUE_DISK2);
-    queueInit(&QUE_NETWORK);
+    //queueInit(&QUE_NETWORK);
 
     FILE* log = fopen("log.txt", "w");
     fclose(log);
@@ -104,7 +104,7 @@ int main(){
                 PROC_DISK(task, eveQue);
                 break;
 
-            case 11:
+            case END:
             {
                 FILE* fp = fopen("log.txt", "a");
                 fprintf(fp, "At time %-7d Job%-3d exits\n", GTIME, task -> seq);

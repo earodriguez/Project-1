@@ -4,19 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ARRIVAL 1
+#define ARRIVAL 8
 #define CPU_BEGIN 2
-#define DISK_ARRIVAL 3
-#define DISK1_BEGIN 4 
-#define DISK2_BEGIN 5
-//#define NETWORK_BEGIN 6
+#define CPU_FINISH 3
 
-#define DISK1_FINISH 7
-#define DISK2_FINISH 8
-//#define NETWORK_FINISH 9 
-#define CPU_FINISH 10
+#define DISK_ARRIVAL 9
+#define DISK1_BEGIN 10
+#define DISK2_BEGIN 11
+#define DISK1_FINISH 5
+#define DISK2_FINISH 6
 
-#define END 11
+#define END 7
+
 
 typedef struct eventStruct {
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SIZE 12
+#define SIZE 15
 
 int* temp;
 unsigned int seed;
@@ -56,41 +56,41 @@ int getQUIT_PROB(){
     return *(temp+4);
 }
 
-/*int getNETWORK_PROB(){
-    return *(temp+5);
-}*/
-
-int getCPU_MIN(){
-    return *(temp+5);
-}
-
-int getCPU_MAX(){
+int getNETWORK_PROB(){
     return *(temp+6);
 }
 
-int getDISK1_MIN(){
+int getCPU_MIN(){
     return *(temp+7);
 }
 
-int getDISK1_MAX(){
+int getCPU_MAX(){
     return *(temp+8);
 }
 
-int getDISK2_MIN(){
+int getDISK1_MIN(){
     return *(temp+9);
 }
 
-int getDISK2_MAX(){
+int getDISK1_MAX(){
     return *(temp+10);
 }
 
-/*int getNETWORK_MIN(){
+int getDISK2_MIN(){
+    return *(temp+11);
+}
+
+int getDISK2_MAX(){
     return *(temp+12);
 }
 
-int getNETWORK_MAX(){
+int getNETWORK_MIN(){
     return *(temp+13);
-}*/
+}
+
+int getNETWORK_MAX(){
+    return *(temp+14);
+}
 
 void clearPtr(){
     free(temp);

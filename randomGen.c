@@ -8,7 +8,7 @@ int randNum (int min, int max){
 }
 
 
-int probGet (int prob){ //Calculates the chance of a process going to disk/network
+int probGet (int prob){ //Calculates the chance of a process finishing
 
     // returns 0 for false, 1 for true
     if(prob < 0 || prob > 100){

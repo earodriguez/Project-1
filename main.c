@@ -19,6 +19,7 @@
 void PROC_ARRIVE (cpuEvent* task, priQue* eveQue);
 void PROC_CPU (cpuEvent* task, priQue* eveQue);
 void PROC_DISK(cpuEvent* task, priQue* eveQue);
+void PROC_NETWORK(cpuEvent* task, priQue* eveQue);
 void getConfig();
 
 //Global variables
@@ -26,27 +27,27 @@ int CPU_STATE = 0;
 int GTIME = 0;
 int DISK1_STATE = 0;
 int DISK2_STATE = 0;
-//int NETWORK_STATE = 0;
+int NETWORK_STATE = 0;
 
 int INI_TIME;
 int FIN_TIME;
 int ARRIVE_MIN;
 int ARRIVE_MAX;
 int QUIT_PROB;
-//int NETWORK_PROB;
+int NETWORK_PROB;
 int CPU_MIN;
 int CPU_MAX;
 int DISK1_MIN;
 int DISK1_MAX;
 int DISK2_MIN;
 int DISK2_MAX;
-//int NETWORK_MIN;
-//int NETWORK_MAX;
+int NETWORK_MIN;
+int NETWORK_MAX;
 
 Node QUE_CPU;
 Node QUE_DISK1;
 Node QUE_DISK2;
-//Node QUE_NETWORK;
+Node QUE_NETWORK;
 
 
 int main(){
@@ -59,7 +60,7 @@ int main(){
     queueInit(&QUE_CPU);
     queueInit(&QUE_DISK1);
     queueInit(&QUE_DISK2);
-    //queueInit(&QUE_NETWORK);
+    queueInit(&QUE_NETWORK);
 
     FILE* log = fopen("log.txt", "w");
     fclose(log);
@@ -87,9 +88,19 @@ int main(){
                 GTIME = task->time;
                 PROC_CPU(task, eveQue);
                 break;
+            
+            case NETWORK_BEGIN:
+                GTIME = task -> time;
+                PROC_NETWORK(task, eveQue);
+                break;
+
+            case NETWORK_FINISH:
+                GTIME = task -> time;
+                PROC_NETWORK(task, eveQue);
+                break;
 
             case DISK_ARRIVAL:
-                GTIME = task->time;
+                GTIME = task -> time;
                 PROC_DISK(task, eveQue);
                 break;
 
@@ -100,7 +111,7 @@ int main(){
 
             case DISK1_FINISH:
             case DISK2_FINISH:
-                GTIME = task->time;
+                GTIME = task -> time;
                 PROC_DISK(task, eveQue);
                 break;
 
@@ -191,9 +202,9 @@ void PROC_CPU(cpuEvent* task, priQue* eveQue){
 
 void PROC_ARRIVE_DISK(cpuEvent* task, priQue* eveQue){
     FILE* fp = fopen("log.txt", "a");
-    fprintf(fp, "At time %-7d Job%-3d arrives at Disk\n", task -> time, task -> seq);
+    fprintf(fp, "At time %-7d Job%-3d arrives at DISK IO\n", task -> time, task -> seq);
     fclose(fp);
-    printf("At time %-7d Job%-3d arrives at Disk\n", task -> time, task -> seq);
+    printf("At time %-7d Job%-3d arrives at DISK IO\n", task -> time, task -> seq);
     int size1 = QUE_DISK1.curPos;
     int size2 = QUE_DISK2.curPos;
     
@@ -216,81 +227,114 @@ void PROC_ARRIVE_DISK(cpuEvent* task, priQue* eveQue){
 
 }
 
+void PROC_NETWORK(cpuEvent* task, priQue* eveQue){
+
+    FILE* fp =fopen("log.txt.", "a");
+    switch (task -> type){
+
+        case NETWORK_BEGIN: {
+            cpuEvent taskFin;
+            taskFin.seq = task -> seq;
+            taskFin.time = randNum(NETWORK_MIN, NETWORK_MAX) + GTIME;
+            taskFin.type = NETWORK_FINISH;
+            pushToQue(eveQue, &taskFin);
+        }
+        
+        case NETWORK_FINISH:{
+            printf("At time %-7d Job%-3d finishes at NETWORK\n", task -> time, task -> seq);
+            fprintf(fp, "At time %-7d Job%-3d finishes at NETWORK\n", task -> time, task -> seq);
+            queueAdd(&QUE_CPU, task -> seq);
+            NETWORK_STATE = IDLE;
+            break;
+        }
+    }
+
+    if((QUE_NETWORK.curPos >= 1) && (NETWORK_STATE == IDLE)){
+        int rmSeq = queueRm(&QUE_NETWORK);
+        printf("At time %-7d job%-3d begins at NETWORK\n",task -> time, rmSeq );
+        fprintf(fp, "At time %-7d job%-3d begins at NETWORK\n",task -> time, rmSeq);
+        cpuEvent jobBegin;
+        jobBegin.seq = rmSeq;
+        jobBegin.time = GTIME;
+        jobBegin.type = NETWORK_BEGIN;
+
+        pushToQue(eveQue, &jobBegin);
+        NETWORK_STATE = BUSY;
+    }
+
+    fclose(fp);
+}
+
 void PROC_DISK(cpuEvent* task, priQue* eveQue){
     FILE* fp = fopen("log.txt", "a");
 
     // // CPU arrival
-    switch (task -> type)
-    {
+    switch (task -> type){
     
-    case DISK_ARRIVAL:
-        PROC_ARRIVE_DISK(task, eveQue);
-        break;
+        case DISK_ARRIVAL:
+            PROC_ARRIVE_DISK(task, eveQue);
+            break;
+        
+        case DISK1_BEGIN :{
+            cpuEvent taskFin1;
+            taskFin1.seq = task -> seq;
+            taskFin1.time = randNum(DISK1_MIN, DISK1_MAX) + GTIME;
+            taskFin1.type = DISK1_FINISH;
+            pushToQue(eveQue, &taskFin1);
+
+            break;
+        }
+
+        case DISK2_BEGIN :{
+            cpuEvent taskFin2;
+            taskFin2.seq = task -> seq;
+            taskFin2.time = randNum(DISK2_MIN, DISK2_MAX) + GTIME;
+            taskFin2.type = DISK2_FINISH;
+            pushToQue(eveQue, &taskFin2);
+
+            break;
+        }
+
+        case DISK1_FINISH:{
+            printf("At time %-7d job%-3d finishes at DISK1\n", task -> time, task -> seq);
+            fprintf(fp, "At time %-7d job%-3d finishes at DISK1\n", task -> time, task -> seq);
+            queueAdd(&QUE_CPU, task -> seq);
+            DISK1_STATE = IDLE;
+            break;
+        }
+        case DISK2_FINISH:{
+            printf("At time %-7d job%-3d finishes at DISK2\n", task -> time, task -> seq);
+            fprintf(fp, "At time %-7d job%-3d finishes at DISK2\n", task -> time, task -> seq);
+            queueAdd(&QUE_CPU, task -> seq);
+            DISK2_STATE = IDLE;
+            break;
+        }   
+    }
     
-    case DISK1_BEGIN :
-    {
-        cpuEvent taskFin1;
-        taskFin1.seq = task -> seq;
-        taskFin1.time = randNum(DISK1_MIN, DISK1_MAX) + GTIME;
-        taskFin1.type = DISK1_FINISH;
-        pushToQue(eveQue, &taskFin1);
 
-        break;
-    }
+        if((QUE_DISK1.curPos >= 1) && (DISK1_STATE == IDLE)){
+            int rmSeq = queueRm(&QUE_DISK1);
+            printf("At time %-7d job%-3d begins at DISK1\n",task -> time, rmSeq );
+            fprintf(fp, "At time %-7d job%-3d begins at DISK1\n",task -> time, rmSeq);
+            cpuEvent jobBegin;
+            jobBegin.seq = rmSeq;
+            jobBegin.time = GTIME;
+            jobBegin.type = DISK1_BEGIN;
 
-    case DISK2_BEGIN :
-    {
-        cpuEvent taskFin2;
-        taskFin2.seq = task -> seq;
-        taskFin2.time = randNum(DISK2_MIN, DISK2_MAX) + GTIME;
-        taskFin2.type = DISK2_FINISH;
-        pushToQue(eveQue, &taskFin2);
+            pushToQue(eveQue, &jobBegin);
+            DISK1_STATE = BUSY;
+        }
+        if((QUE_DISK2.curPos >= 1) && (DISK2_STATE == IDLE)){
+            int rmSeq = queueRm(&QUE_DISK2);
+            printf("At time %-7d job%-3d begins at DISK2\n",task -> time, rmSeq );
+            fprintf(fp, "At time %-7d job%-3d begins at DISK2\n",task -> time, rmSeq);
+            cpuEvent jobBegin;
+            jobBegin.seq = rmSeq;
+            jobBegin.time = GTIME;
+            jobBegin.type = DISK2_BEGIN;
 
-        break;
-    }
-
-    case DISK1_FINISH:
-        printf("At time %-7d Job%-3d finishes at Disk1\n", task -> time, task -> seq);
-        fprintf(fp, "At time %-7d Job%-3d finishes at Disk1\n", task -> time, task -> seq);
-        queueAdd(&QUE_CPU, task -> seq);
-        DISK1_STATE = IDLE;
-        break;
-
-    case DISK2_FINISH:
-        printf("At time %-7d Job%-3d finishes at Disk2\n", task -> time, task -> seq);
-        fprintf(fp, "At time %-7d Job%-3d finishes at Disk2\n", task -> time, task -> seq);
-        queueAdd(&QUE_CPU, task -> seq);
-        DISK2_STATE = IDLE;
-        break;
-    }
-
-    if((QUE_DISK1.curPos >= 1) && (DISK1_STATE == IDLE)){
-        // 1. pop out the 1st one
-        int rmSeq = queueRm(&QUE_DISK1);
-        printf("At time %-7d job%-3d begins at Disk1\n",task -> time, rmSeq );
-        fprintf(fp, "At time %-7d job%-3d begins at Disk1\n",task -> time, rmSeq);
-        // 2. create disk begins
-        cpuEvent jobBegin;
-        jobBegin.seq = rmSeq;
-        jobBegin.time = GTIME;
-        jobBegin.type = DISK1_BEGIN;
-
-        pushToQue(eveQue, &jobBegin);
-        DISK1_STATE = BUSY;
-    }
-    if((QUE_DISK2.curPos >= 1) && (DISK2_STATE == IDLE)){
-        // 1. pop out the 1st one
-        int rmSeq = queueRm(&QUE_DISK2);
-        printf("At time %-7d job%-3d begins at Disk2\n",task -> time, rmSeq );
-        fprintf(fp, "At time %-7d job%-3d begins at Disk2\n",task -> time, rmSeq);
-        // 2. create disk begins
-        cpuEvent jobBegin;
-        jobBegin.seq = rmSeq;
-        jobBegin.time = GTIME;
-        jobBegin.type = DISK2_BEGIN;
-
-        pushToQue(eveQue, &jobBegin);
-        DISK2_STATE = BUSY;
+            pushToQue(eveQue, &jobBegin);
+            DISK2_STATE = BUSY;
     }
     fclose(fp);
 }
@@ -300,6 +344,7 @@ void getConfig(){
     FIN_TIME = getFIN_TIME();
     ARRIVE_MIN = getARRIVE_MIN();
     ARRIVE_MAX = getARRIVE_MAX();
+    NETWORK_PROB = getNETWORK_PROB();
     QUIT_PROB = getQUIT_PROB();
     CPU_MIN = getCPU_MIN();
     CPU_MAX = getCPU_MIN();
@@ -307,6 +352,8 @@ void getConfig(){
     DISK1_MAX = getDISK1_MAX();
     DISK2_MIN = getDISK2_MIN();
     DISK2_MAX = getDISK2_MAX();
+    NETWORK_MIN = getNETWORK_MIN();
+    NETWORK_MAX = getNETWORK_MAX();
 }
 
 

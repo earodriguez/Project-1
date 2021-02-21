@@ -8,6 +8,8 @@
 #define CPU_BEGIN 2
 #define CPU_FINISH 3
 
+#define NETWORK_BEGIN 12
+#define NETWORK_FINISH 13
 #define DISK_ARRIVAL 9
 #define DISK1_BEGIN 10
 #define DISK2_BEGIN 11

@@ -19,7 +19,7 @@
 void PROC_ARRIVE (cpuEvent* task, priQue* eveQue);
 void PROC_CPU (cpuEvent* task, priQue* eveQue);
 void PROC_DISK(cpuEvent* task, priQue* eveQue);
-void readFile();
+void getConfig();
 
 //Global variables
 int CPU_STATE = 0;
@@ -52,29 +52,29 @@ Node QUE_NETWORK;
 int main(){
 
     parseFile();
-    srand(getSeed());
+    srand(getSEED());
     cpuEvent* task;
-    priQue* eveQue = initPriorityQueue()
+    priQue* eveQue = initPriorityQueue();
 
-    queueInit(&queue_CPU);
-    queueInit(&queue_DISK1):
-    queueInit(&queue_DISK2);
-    queueInit(&queue_NETWORK);
+    queueInit(&QUE_CPU);
+    queueInit(&QUE_DISK1);
+    queueInit(&QUE_DISK2);
+    queueInit(&QUE_NETWORK);
 
-    FILE* fileOut = fopen("log.txt", "w");
-    fclose(fileOut);
+    FILE* log = fopen("log.txt", "w");
+    fclose(log);
 
     cpuEvent job1;
     job1.seq = 1;
     job1.type = ARRIVAL;
     job1.time = 0;
-    push(eveQue, &job1);
+    pushToQue(eveQue, &job1);
 
     while(isEmpty(eveQue) && (GTIME < FIN_TIME)){
 
-    task = pop(eveQue);
+    task = popEve(eveQue);
         switch (task -> type){
-            case ARRIVAL;
+            case ARRIVAL:
                 GTIME = task -> time;
                 PROC_CPU(task, eveQue);
                 break;
@@ -100,11 +100,11 @@ int main(){
 
             case DISK1_FINISH:
             case DISK2_FINISH:
-                timeGlobal = task->time;
-                PROC_DISK(task, EventQueue);
+                GTIME = task->time;
+                PROC_DISK(task, eveQue);
                 break;
 
-            case 7:
+            case 11:
             {
                 FILE* fp = fopen("log.txt", "a");
                 fprintf(fp, "At time %-7d Job%-3d exits\n", GTIME, task -> seq);
@@ -118,13 +118,14 @@ int main(){
     clearPriQue(eveQue);
     clearPtr();
     return 1;
+}
 
 void PROC_ARRIVE(cpuEvent* task, priQue* eveQue){
     FILE* fp = fopen("log.txt", "a");
     fprintf(fp, "At time %-7d Job%-3d arrives\n", task->time, task->seq);
     fclose(fp);
     printf("At time %-5d Job%-7d arrives\n", task->time, task->seq);
-    queueAdd(&queue_CPU, task->seq);
+    queueAdd(&QUE_CPU, task -> seq);
 
     cpuEvent nextJob;
     nextJob.seq = task -> seq + 1;
@@ -143,7 +144,7 @@ void PROC_CPU(cpuEvent* task, priQue* eveQue){
     }
 
     if(task -> type == CPU_BEGIN){ 
-        cpuEvent task_fin;
+        cpuEvent taskFin;
         taskFin.seq = task -> seq;
         taskFin.time = randNum(CPU_MIN, CPU_MAX) + GTIME;
         taskFin.type = CPU_FINISH;
@@ -158,7 +159,7 @@ void PROC_CPU(cpuEvent* task, priQue* eveQue){
             diskTask.time = task -> time;
             diskTask.type = DISK_ARRIVAL;
 
-            push(eveQue, &diskTask);
+            pushToQue(eveQue, &diskTask);
         }
         else{
             cpuEvent allFin;
@@ -168,24 +169,24 @@ void PROC_CPU(cpuEvent* task, priQue* eveQue){
             pushToQue(eveQue, &allFin);
         }
         CPU_STATE = IDLE;
-        printf("At time %-7d job%-3d finishes at CPU\n",GTIME, task -> seq );
-        fprintf(file, "At time %-7d job%-3d finishes at CPU\n" GTIME, task -> seq);
+        printf("At time %-7d job%-3d finishes at CPU\n", GTIME, task -> seq );
+        fprintf(fp, "At time %-7d job%-3d finishes at CPU\n", GTIME, task -> seq);
 
     }
-    if( (queue_CPU.current>=1) && (CPU_STATE) == IDLE){
-        int seqPop = queueRm(&queue_CPU);
+    if( (QUE_CPU.curPos>=1) && (CPU_STATE) == IDLE){
+        int seqPop = queueRm(&QUE_CPU);
         printf("At time %-7d job%-3d begins at CPU\n",task -> time, seqPop );
-        fprintf(file, "At time %-7d job%-3d begins at CPU\n",task -> time, seqPop);
+        fprintf(fp, "At time %-7d job%-3d begins at CPU\n",task -> time, seqPop);
         cpuEvent jobBegin;
         jobBegin.seq = seqPop;
-        jobBegin.time = timeGlobal;
+        jobBegin.time = GTIME;
         jobBegin.type = CPU_BEGIN; 
 
         pushToQue(eveQue, &jobBegin);
 
         CPU_STATE = BUSY;
     }
-    fclose(fP);
+    fclose(fp);
 }
 
 void PROC_ARRIVE_DISK(cpuEvent* task, priQue* eveQue){
@@ -198,18 +199,18 @@ void PROC_ARRIVE_DISK(cpuEvent* task, priQue* eveQue){
     
     if(DISK1_STATE == IDLE && DISK2_STATE == IDLE){
         if(size1 > size2){
-            enQueue(&QUE_DISK2, task->seq);
+            queueAdd(&QUE_DISK2, task->seq);
         }
         else{
-            enQueue(&QUE_DISK1, task->seq);
+            queueAdd(&QUE_DISK1, task->seq);
         }
     }
     else{
         if(DISK1_STATE == IDLE && DISK2_STATE == BUSY){
-            enQueue(&QUE_DISK1, task-> seq);
+            queueAdd(&QUE_DISK1, task-> seq);
         }
         if(DISK2_STATE == IDLE && DISK1_STATE == BUSY){
-            enQueue(&QUE_DISK2, task -> seq);
+            queueAdd(&QUE_DISK2, task -> seq);
         }
     }
 
@@ -269,47 +270,43 @@ void PROC_DISK(cpuEvent* task, priQue* eveQue){
         printf("At time %-7d job%-3d begins at Disk1\n",task -> time, rmSeq );
         fprintf(fp, "At time %-7d job%-3d begins at Disk1\n",task -> time, rmSeq);
         // 2. create disk begins
-        Event jobBegin;
+        cpuEvent jobBegin;
         jobBegin.seq = rmSeq;
-        job_begin.time = GTIME;
-        job_begin.type = DISK1_BEGIN;
+        jobBegin.time = GTIME;
+        jobBegin.type = DISK1_BEGIN;
 
         pushToQue(eveQue, &jobBegin);
         DISK1_STATE = BUSY;
     }
-    if((QUE_DISK2.current >= 1) && (DISK2_STATE == IDLE)){
+    if((QUE_DISK2.curPos >= 1) && (DISK2_STATE == IDLE)){
         // 1. pop out the 1st one
         int rmSeq = queueRm(&QUE_DISK2);
         printf("At time %-7d job%-3d begins at Disk2\n",task -> time, rmSeq );
         fprintf(fp, "At time %-7d job%-3d begins at Disk2\n",task -> time, rmSeq);
         // 2. create disk begins
-        Event jobBegin;
+        cpuEvent jobBegin;
         jobBegin.seq = rmSeq;
-        job_begin.time = GTIME;
-        job_begin.type = DISK2_BEGIN;
+        jobBegin.time = GTIME;
+        jobBegin.type = DISK2_BEGIN;
 
         pushToQue(eveQue, &jobBegin);
         DISK2_STATE = BUSY;
     }
     fclose(fp);
 }
-void parseFile(){
-    readFile();
-    INI_TIME = getIniTime();
-    FIN_TIME = getFinTime();
-    ARRIVE_MIN = getArrivalMin();
-    ARRIVE_MAX = getArrivalMax();
-    QUIT_PROB = getQuitProb();
-    CPU_MIN = getCPUMin();
-    CPU_MAX = getCPUMax();
-    DISK1_MIN = getDisk1Min();
-    DISK1_MAX = getDisk1Max();
-    DISK2_MIN = getDisk2Min();
-    DISK2_MAX = getDisk2Max();
-}
-
-
-
+void getConfig(){
+    parseFile();
+    INI_TIME = getINIT_TIME();
+    FIN_TIME = getFIN_TIME();
+    ARRIVE_MIN = getARRIVE_MIN();
+    ARRIVE_MAX = getARRIVE_MAX();
+    QUIT_PROB = getQUIT_PROB();
+    CPU_MIN = getCPU_MIN();
+    CPU_MAX = getCPU_MIN();
+    DISK1_MIN = getDISK1_MIN();
+    DISK1_MAX = getDISK1_MAX();
+    DISK2_MIN = getDISK2_MIN();
+    DISK2_MAX = getDISK2_MAX();
 }
 
 

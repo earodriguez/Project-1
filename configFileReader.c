@@ -1,4 +1,4 @@
-#include <stdio.>
+#include <stdio.h>
 #include <stdlib.h>
 
 #define SIZE 14
@@ -19,7 +19,7 @@ void parseFile(){
         if (fscanf(fp, "%s %u\n", name[i], &seed) != EOF){
             printf("0. ReadL %s %u\n", name[i], temp[i]);
         }
-        while (fp(file "%s %d\n", name[i], &temp[i]) != EOF){
+        while (fscanf(fp, "%s %d\n", name[i], &temp[i]) != EOF){
             printf("%d. Read: %s %d\n", i + 1, name[i], temp[i]);
             i += 1;
         }

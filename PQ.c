@@ -4,19 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ARRIVAL
-#define CPU_BEGIN
-#define DISK_ARRIVAL
-#define DISK1_BEGIN
-#define DISK2_BEGIN
-#define NETWORK_BEGIN
+#define ARRIVAL 1
+#define CPU_BEGIN 2
+#define DISK_ARRIVAL 3
+#define DISK1_BEGIN 4 
+#define DISK2_BEGIN 5
+//#define NETWORK_BEGIN 6
 
-#define DISK1_FINISH
-#define DISK2_FINISH
-#define NETWORK_FINISH
-#define CPU_FINISH
+#define DISK1_FINISH 7
+#define DISK2_FINISH 8
+//#define NETWORK_FINISH 9 
+#define CPU_FINISH 10
 
-#define END
+#define END 11
 
 typedef struct eventStruct {
 
@@ -35,7 +35,7 @@ typedef struct priorityQueue{
 priQue* initPriorityQueue(){
 
     //Initialization of the priority queue heap and cpu beginning and ending events
-    priQue* heap = malloc(sizeof(PQueue));
+    priQue* heap = malloc(sizeof(priQue));
     cpuEvent* start = malloc(sizeof(cpuEvent));
     cpuEvent* end = malloc(sizeof(cpuEvent));
 
@@ -49,11 +49,11 @@ priQue* initPriorityQueue(){
     heap -> max = 10;
     heap -> size = 2;
 
-    start -> job = 0;
+    start -> seq = 0;
     start -> time = 0;
     start -> type = 1;
 
-    end -> job = 0;
+    end -> seq = 0;
     end -> time = 10000;
     end -> type = 8;
 
@@ -68,11 +68,11 @@ int compare(const void *x, const void *y){
 
     cpuEvent* a = (cpuEvent*) x;
     cpuEvent* b = (cpuEvent*) y;
-    return (a -> time) - (b -> time)
+    return (a -> time) - (b -> time);
 }
 
 //Returns 1 if queue is full, 0 if not
-int isFull(priQueue* heap){
+int isFull(priQue* heap){
 
     if(heap -> max == heap -> size){
     return 1;
@@ -97,7 +97,7 @@ void pushToQue(priQue* heap, cpuEvent* eve){
 //Pops the top element in the heap, IE removes it
 cpuEvent* popEve(priQue* heap){
 
-    cpuEvent* rm = heap -> event
+    cpuEvent* rm = heap -> event;
     heap -> event = &heap -> event[1];
     heap -> size -= 1;
     return rm;
@@ -118,7 +118,7 @@ int isEmpty(priQue* heap){
 void printQue(priQue* heap){
 
     for(int i = 0; i < heap -> size; i++){
-    printf("JOB-SEQ: %-2d, TIME:%-5d type:%-2d\n", heap -> event -> jobSeq, heap -> event -> time,
+    printf("JOB-SEQ: %-2d, TIME:%-5d type:%-2d\n", heap -> event -> seq, heap -> event -> time,
                                                    heap -> event -> type);
     heap -> event++;
     }

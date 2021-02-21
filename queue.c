@@ -17,7 +17,7 @@ void queueInit(Node *queue) { //initializes all queue elements to 0
     queue-> size = 10;
     queue-> curPos = 0;
 
-    for (int i = 0; i < queue -> size; i++;){
+    for (int i = 0; i < queue -> size; i++){
         (queue -> seq)[i] = 0;
     }
 }
@@ -49,13 +49,13 @@ void queueMoveUp(int *queSeq, int *size){
     *size -= 1;
 }
 
-void queueRm(Node *queue) {
+int queueRm(Node *queue) {
 
     if (queue == NULL){
     return 0;
     }
 
-    int rmEle = queue -> seq[0]
+    int rmEle = queue -> seq[0];
     queueMoveUp(queue -> seq, &queue -> curPos);
     return rmEle;
 }
@@ -63,7 +63,7 @@ void queueRm(Node *queue) {
 void queuePrint(Node *queue){
     
     for (int i = 0; i < queue -> size; i++){
-    printf("Job: %d\t\n", queue -> seq[i];
+    printf("Job: %d\t\n", queue -> seq[i]);
     }
 
 }
